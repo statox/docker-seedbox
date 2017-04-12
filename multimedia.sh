@@ -66,7 +66,7 @@ function installShipyard() {
 function installNewUser() {
     HOME=/home/seed/$USER
     mkdir $HOME
-    cp docker-compose.yml
+    cp docker-compose.yml $HOME
     cd $HOME
     docker-compose up
 }
