@@ -68,7 +68,7 @@ function installNewUser() {
     mkdir $HOME
     cp docker-compose.yml $HOME
     cd $HOME
-    docker-compose up
+    docker-compose up -d
 }
 
 USER=user1
