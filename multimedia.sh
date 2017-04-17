@@ -1,38 +1,4 @@
-## Install seedbox system for several users with
-##    Transmission
-##    Sonarr
-##    Headphones
-##
-## Debian 8
-
-# References:
-#   DOCKER INSTALL                - https://docs.docker.com/engine/installation/linux/debian/
-#   SHIPYARD (docker management)  - https://github.com/shipyard/shipyard
-#   DOCKER TRANSMISSION           - https://hub.docker.com/r/dperson/transmission/
-#   DOCKER SONARR                 - https://hub.docker.com/r/linuxserver/sonarr/
-#   DOCKER HEADPHONES             - https://hub.docker.com/r/linuxserver/headphones/
-
-# TODO
-# Shipyard
-#   See how to use -disable-usage-info to disable anonymous report
-#   Add variables to change credentials
-# Transmission
-#   Add variables to change credentials
-# Sonar
-#   Change permissions to /downloads
-#   Add variables to change credentials
-#   Check how to automatically configure transmission
-#   Check how to automatically configure providers
-# Hearphones
-#   Change permissions to /downloads
-#   Add variables to change credentials
-#   Check how to automatically configure transmission
-#   Check how to automatically configure providers
-
-# TODO other tools to install
-#   PROXY T411    - https://github.com/KiLMaN/T411-Torznab
-#   SICKBEARD     - https://hub.docker.com/r/linuxserver/sickbeard/
-#   COUCH POTATO  - https://hub.docker.com/r/linuxserver/couchpotato/
+#!/bin/bash
 
 function installCore() {
     echo "Installing docker"
@@ -45,13 +11,11 @@ function installCore() {
     installShipyard
 }
 function installDocker() {
-
     apt-get -y install apt-transport-https ca-certificates curl software-properties-common
     curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
     add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
     apt-get -y update
     apt-get -y install docker-ce
-
 }
 
 function installCompose() {
@@ -64,18 +28,23 @@ function installShipyard() {
 }
 
 function installNewUser() {
+    echo "Enter the new of the new user"
+    read USER
+
+    # Create the home directory
+    HOME=/home/seed/$USER
     mkdir -p $HOME
     cp docker-compose.yml $HOME
-    cd $HOME
 
     # Create the containers and their configuration files
+    cd $HOME
     docker-compose up -d
     docker-compose stop
 
     # Change transmission
-    sed -i '/rpc-authentication-required/s/false/true/' $HOME/etc/transmission/settings.json
-    sed -i '/rpc-username/s/""/"' . $USER . '"/'        $HOME/etc/transmission/settings.json
-    sed -i '/rpc-password/s/:.*/: "' . $USER . '",/'    $HOME/etc/transmission/settings.json
+    sed -i '/rpc-authentication-required/s/false/true/' ./etc/transmission/settings.json
+    sed -i '/rpc-username/s/""/"' . $USER . '"/'        ./etc/transmission/settings.json
+    sed -i '/rpc-password/s/:.*/: "' . $USER . '",/'    ./etc/transmission/settings.json
 }
 
 function startUserContainers() {
@@ -83,8 +52,6 @@ function startUserContainers() {
     docker-compose up -d
 }
 
-USER=user1
-HOME=/home/seed/$USER
 
 installCore
 installNewUser
