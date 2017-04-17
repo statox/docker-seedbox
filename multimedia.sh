@@ -79,7 +79,7 @@ function installNewUser() {
     sed -i '
     /username/s/$/'"$USER"'/
     /password/s/$/'"$USER"'/
-    './etc/couchpotato/config.ini
+    ' ./etc/couchpotato/config.ini
 }
 
 function startUserContainers() {
