@@ -39,12 +39,42 @@ function installNewUser() {
     # Create the containers and their configuration files
     cd $HOME
     docker-compose up -d
+
+    echo "Waiting for the containers to start"
+    while
+        [ ! -f ./etc/headphones/config.ini ]
+        || [ ! -f ./etc/transmission/settings.json ]
+    do
+        echo "."
+        sleep 2
+    done
+
     docker-compose stop
 
-    # Change transmission
-    sed -i '/rpc-authentication-required/s/false/true/' ./etc/transmission/settings.json
-    sed -i '/rpc-username/s/""/"' $USER '"/'        ./etc/transmission/settings.json
-    sed -i '/rpc-password/s/:.*/: "' $USER '",/'    ./etc/transmission/settings.json
+    # Change transmission configuration
+    sed -i '
+    /rpc-authentication-required/s/false/true/
+    /rpc-username/s/""/"'$USER'"/
+    /rpc-password/s/:.*/: "'$USER'",/
+    ' ./etc/transmission/settings.json
+
+    # Change headphones configuration
+    sed -i '
+    /transmission_host/s/""/http:\/\/transmission:9091/
+    /transmission_user/s/""/'$USER'/
+    /transmission_password/s/""/'$USER'/
+    /download_torrent_dir/s/""/\/var\/lib\/transmission-daemon\/Downloads/
+    /torrent_downloader/s/0/1/
+
+    /http_username/s/""/'$USER'/
+    /http_password/s/""/'$USER'/
+
+    /numberofseeders/s/10/2/
+
+    /oldpiratebay/s/0/1/
+    /piratebay/s/0/1/
+    /mininova/s/0/1/
+    ' ./etc/headphones/config.ini
 }
 
 function startUserContainers() {
