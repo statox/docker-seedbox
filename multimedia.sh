@@ -43,8 +43,8 @@ function installNewUser() {
 
     # Change transmission
     sed -i '/rpc-authentication-required/s/false/true/' ./etc/transmission/settings.json
-    sed -i '/rpc-username/s/""/"' . $USER . '"/'        ./etc/transmission/settings.json
-    sed -i '/rpc-password/s/:.*/: "' . $USER . '",/'    ./etc/transmission/settings.json
+    sed -i '/rpc-username/s/""/"' $USER '"/'        ./etc/transmission/settings.json
+    sed -i '/rpc-password/s/:.*/: "' $USER '",/'    ./etc/transmission/settings.json
 }
 
 function startUserContainers() {
