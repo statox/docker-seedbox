@@ -19,7 +19,7 @@ function installDocker() {
 }
 
 function installCompose() {
-    curl -L https://github.com/docker/compose/releases/download/1.12.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
+    curl -L https://github.com/docker/compose/releases/download/1.12.0/docker-compose-"$(uname -s)"-"$(uname -s)" > /usr/local/bin/docker-compose
     chmod +x /usr/local/bin/docker-compose
 }
 
@@ -29,15 +29,15 @@ function installShipyard() {
 
 function installNewUser() {
     echo "Enter the new of the new user"
-    read USER
+    read -r USER
 
     # Create the home directory
     HOME=/home/seed/$USER
-    mkdir -p $HOME
-    cp docker-compose.yml $HOME
+    mkdir -p "$HOME"
+    cp docker-compose.yml "$HOME"
 
     # Create the containers and their configuration files
-    cd $HOME
+    cd "$HOME" || exit
     docker-compose up -d
 
     echo "Waiting for the containers to start"
@@ -54,20 +54,20 @@ function installNewUser() {
     # Change transmission configuration
     sed -i '
     /rpc-authentication-required/s/false/true/
-    /rpc-username/s/""/"'$USER'"/
-    /rpc-password/s/:.*/: "'$USER'",/
+    /rpc-username/s/""/"'"$USER"'"/
+    /rpc-password/s/:.*/: "'"$USER"'",/
     ' ./etc/transmission/settings.json
 
     # Change headphones configuration
     sed -i '
     /transmission_host/s/""/http:\/\/transmission:9091/
-    /transmission_user/s/""/'$USER'/
-    /transmission_password/s/""/'$USER'/
+    /transmission_user/s/""/'"$USER"'/
+    /transmission_password/s/""/'"$USER"'/
     /download_torrent_dir/s/""/\/var\/lib\/transmission-daemon\/Downloads/
     /torrent_downloader/s/0/1/
 
-    /http_username/s/""/'$USER'/
-    /http_password/s/""/'$USER'/
+    /http_username/s/""/'"$USER"'/
+    /http_password/s/""/'"$USER"'/
 
     /numberofseeders/s/10/2/
 
@@ -75,10 +75,15 @@ function installNewUser() {
     /piratebay/s/0/1/
     /mininova/s/0/1/
     ' ./etc/headphones/config.ini
+
+    sed -i '
+    /username/s/$/'"$USER"'/
+    /password/s/$/'"$USER"'/
+    './etc/couchpotato/config.ini
 }
 
 function startUserContainers() {
-    cd $HOME
+    cd "$HOME" || exit
     docker-compose up -d
 }
 
