@@ -42,7 +42,7 @@ function installNewUser() {
 
     echo "Waiting for the containers to start"
     while
-        [ ! -f ./etc/headphones/config.ini ]
+        [ ! -f ./etc/headphones/config.ini ] \
         || [ ! -f ./etc/transmission/settings.json ]
     do
         echo "."
