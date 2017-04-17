@@ -53,7 +53,7 @@ services:
             - PUID=1001
             - TZ=Europe
         ports:
-            - 9004:5050
+            - 9003:5050
 
     sickbeard:
         image: linuxserver/sickbeard
@@ -66,4 +66,16 @@ services:
             - PUID=1001
             - TZ=Europe
         ports:
-            - 9003:8181
+            - 9004:8181
+
+    jackett:
+        image: linuxserver/jackett
+        volumes:
+            - ./etc/jackett:/config
+            - ./torrents:/downloads
+        environment:
+            - PGID=1001
+            - PUID=1001
+            - TZ=Europe
+        ports:
+            - 9005:8181

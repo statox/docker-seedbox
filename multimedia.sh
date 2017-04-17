@@ -64,14 +64,28 @@ function installShipyard() {
 }
 
 function installNewUser() {
-    HOME=/home/seed/$USER
-    mkdir $HOME
+    mkdir -p $HOME
     cp docker-compose.yml $HOME
+    cd $HOME
+
+    # Create the containers and their configuration files
+    docker-compose up -d
+    docker-compose stop
+
+    # Change transmission
+    sed -i '/rpc-authentication-required/s/false/true/' $HOME/etc/transmission/settings.json
+    sed -i '/rpc-username/s/""/"' . $USER . '"/'        $HOME/etc/transmission/settings.json
+    sed -i '/rpc-password/s/:.*/: "' . $USER . '",/'    $HOME/etc/transmission/settings.json
+}
+
+function startUserContainers() {
     cd $HOME
     docker-compose up -d
 }
 
 USER=user1
+HOME=/home/seed/$USER
 
 installCore
 installNewUser
+startUserContainers
