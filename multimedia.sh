@@ -43,7 +43,8 @@ function installNewUser() {
     echo "Waiting for the containers to start"
     while
         [ ! -f ./etc/headphones/config.ini ] \
-        || [ ! -f ./etc/transmission/settings.json ]
+        || [ ! -f ./etc/transmission/settings.json ] \
+        || [ ! -f ./etc/couchpotato/config.ini ]
     do
         echo "."
         sleep 2
@@ -76,10 +77,40 @@ function installNewUser() {
     /mininova/s/0/1/
     ' ./etc/headphones/config.ini
 
-    sed -i '
-    /username/s/$/'"$USER"'/
-    /password/s/$/'"$USER"'/
-    ' ./etc/couchpotato/config.ini
+    # Change couchpotato configuration
+    # (We have to use awk because of the format of the config file)
+    awk -v USER="$USER" '
+        BEGIN {
+            RS="";
+            FS="\n";
+            ORS="\n\n";
+        }
+        {
+            if ($1 == "[core]") {
+                sub("username = ", "username = "USER, $0)
+                sub("[^_]password = ", "\npassword = "USER, $0)
+                sub("show_wizard = 1", "show_wizard = 0", $0)
+
+            } else if ($1 == "[transmission]") {
+                sub("username =", "username = "USER, $0)
+                sub("enabled = 0", "enabled = 1", $0)
+                sub("localhost", "transmission", $0)
+                sub("directory = ", "directory = /var/lib/transmission-daemon/Downloads/", $0)
+                sub("remove_complete = True", "remove_complete = False", $0)
+                sub("password = ", "password = "USER, $0)
+            } else if ($1 == "[rarbg]") {
+                sub("enabled = False", "enabled = True", $0)
+                sub("min_seeders = 10", "min_seeders = 1", $0)
+            } else if ($1 == "[rarbg]") {
+                sub("enabled = False", "enabled = True", $0)
+            } else if ($1 == "[searcher]") {
+                sub("french, ", "", $0)
+            }
+
+            print $0
+        }
+    ' ./etc/couchpotato/config.ini > ./etc/couchpotato/config.ini.tmp
+    #mv ./etc/couchpotato/config.ini.tmp ./etc/couchpotato/config.ini
 }
 
 function startUserContainers() {
