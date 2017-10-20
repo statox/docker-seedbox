@@ -1,3 +1,7 @@
+# DO NOT USE THIS REPO
+
+This is a work in progress and it seems to install malicious containers for a reason that I don't understand yet!
+
 # docker-seedbox
 Automatic seedbox creation with docker
 
